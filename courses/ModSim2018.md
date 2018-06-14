@@ -48,9 +48,16 @@ Readings:
 
  * Python programming
  
+ Tasks (for Lecture 6):
+ 
+  * Plot the trajectory of a particle with gravity force acting on it (gravity acceleration $g = -9.81 m/s^2$)
+ 
+ 
 ### Lecture 5
 
  * Discussion about TSIANOS and LOEB (2017) and Zajac (1993)
+ 
+ 
  
 
  
