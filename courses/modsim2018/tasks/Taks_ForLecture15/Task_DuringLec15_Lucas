@@ -1,0 +1,54 @@
+% muscle.m
+% Program to simulate muscle contractions using 3-component Hill model
+
+% muscle properties for human Vastus Lateralis
+Lslack = 0.223;		% slack length of SEE
+Umax = 0.04;		% strain in SEE is 4% at Fmax
+Lceopt = 0.093;		% optimal length of CE
+width  = 0.63*Lceopt;	% maximum length change of CE
+Fmax = 7400;		% maximal isometric force
+a = 0.25*Fmax;		% force-velocity parameter a
+b = 0.25*10*Lceopt;	% force-velocity parameter b (Nigg & Herzog, p. 174-175)
+
+% set initial condition for state variable Lce and initialize ODE solver
+Lce = 0.087;	% this makes SEE just slack at t=0
+t = 0; tend = 2.99;	% start time and duration of experiment
+h = 0.001;	% integration step size in seconds
+i = 1;		% step counter
+data = zeros(tend/h,2);	% space to store time and force results
+
+% start simulation
+while (t < tend)
+
+% prescribed ramp shortening profile
+if (t<=1) Lm = 0.31; end			% initial muscle+tendon length
+ 
+if (t>1 & t<2) Lm = 0.31-0.04*(t-1); end	% ramp shortening at 4 cm/s
+
+% Calculate force in SEE from current SEE length
+Lsee = Lm - Lce;	% length of SEE is total length minus CE length
+if (Lsee < Lslack)
+    F = 0;		% SEE is slack, so no force
+else
+    F = Fmax*((Lsee-Lslack)/(Umax*Lslack))^2;	% SEE has quadratic force-length relationship
+end
+
+% calculate isometric force at this Lce from force-length relationship of CE
+F0 = max([0 Fmax*(1-((Lce-Lceopt)/width)^2)]);
+
+% calculate Lcedot from Hill's equation assuming that muscle is maximally activated
+if (F > F0)
+   disp('Error: program cannot do eccentric contractions');
+   return;
+end
+
+Lcedot = -b*(F0-F)/(F+a);	% note: Vce is negative for shortening!
+% do one forward Euler integration step to calculate new Lce and store data
+  Lce = Lce + h*Lcedot;
+  t = t + h; i = i + 1;
+  data(i,:) = [t F];
+
+  end
+
+plot(data(:,1),data(:,2));
+xlabel('Time [s]');ylabel('Force [N]');
